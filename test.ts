@@ -269,4 +269,29 @@ class NumberQueue<T> extends PriorityQueue<NumberQueueItem<T>,number> {
 			counter++
 		})
 	}
+
+	@test("empty test") case26() {
+		const nq = new NumberQueue<string>( (a: number, b: number): number => a > b ? -1 : a < b ? 1 : 0 )
+		equal( nq.isEmpty(), true )
+		nq.enqueue( new NumberQueueItem<string>( "second" ), 2 )
+		nq.enqueue( new NumberQueueItem<string>( "first" ), 3 )
+		nq.enqueue( new NumberQueueItem<string>( "third") , 1 )
+		equal( nq.isEmpty(), false )
+		equal( nq.dequeue().value, "first" )
+		equal( nq.dequeue().value, "second" )
+		equal( nq.dequeue().value, "third" )
+		equal( nq.isEmpty(), true )
+	}
+
+	@test("clear test") case27() {
+		const nq = new NumberQueue<string>()
+		equal( nq.isEmpty(), true )
+		equal( nq.clear(), false )
+		nq.enqueue( new NumberQueueItem<string>( "first" ), -30 )
+		nq.enqueue( new NumberQueueItem<string>( "third") , -10 )
+		nq.enqueue( new NumberQueueItem<string>( "second" ), -20 )
+		equal( nq.isEmpty(), false )
+		equal( nq.clear(), true )
+		equal( nq.isEmpty(), true )
+	}
 }

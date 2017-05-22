@@ -1,7 +1,7 @@
 import { Priority } from './Priority'
 
 export class PriorityQueue<T extends Priority<P>,P> {
-	static DEFAULT_COMPARATOR = ( a: any, b:any ): number => {
+	static DEFAULT_COMPARATOR = ( a: any, b: any ): number => {
 		if ( a < b ) {
 			return -1
 		} else if ( a > b ) {
@@ -12,10 +12,14 @@ export class PriorityQueue<T extends Priority<P>,P> {
 	}
 
 	protected elements: T[] = []
-	protected comparator: (a: P, b: P) => number 
+	protected comparator: ( a: P, b: P ) => number
 
 	get length() {
 		return this.elements.length
+	}
+
+	isEmpty() {
+		return this.elements.length === 0
 	}
 
 	constructor( 
@@ -46,20 +50,18 @@ export class PriorityQueue<T extends Priority<P>,P> {
 
 	batchEnqueue( newElements: T[], priorities?: P[] ): number {
 		const elements = this.elements
-		//let innerIndex = 0
 		let notInserted = 0
 		for ( let i = 0, len = newElements.length; i < len; i++ ) {
-			const newElement = newElements[i]//of newElements ) {
+			const newElement = newElements[i]
 			if ( newElement.queueIndex >= 0 ) {
 				notInserted++
 			} else {
 				newElement.queueIndex = elements.length
-				if ( priorities !== undefined && i < priorities.length ) {//innerIndex ) {
+				if ( priorities !== undefined && i < priorities.length ) {
 					newElement.priority = priorities[i]
 				}
 				elements.push( newElement )
 			}
-			//innerIndex++
 		}
 		this.algorithmFloyd()
 		return notInserted
@@ -92,6 +94,18 @@ export class PriorityQueue<T extends Priority<P>,P> {
 	has( element: T ): boolean {
 		const index = element.queueIndex
 		return index >= 0 && this.elements[index] === element
+	}
+
+	clear(): boolean {
+		if ( !this.isEmpty() ) {
+			for ( const element of this.elements ) {
+				element.queueIndex = -1
+			}
+			this.elements = []
+			return true
+		} else {
+			return false
+		}
 	}
 
 	update( element: T, priority?: P ): boolean {
