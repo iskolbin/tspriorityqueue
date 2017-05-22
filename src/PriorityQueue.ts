@@ -108,7 +108,7 @@ export class PriorityQueue<T extends Priority<P>,P> {
 		if ( this.has( element )) {
 			element.queueIndex = -1
 			const lastElement = elements.pop()
-			if ( lastElement !== element ) {
+			if ( lastElement !== undefined && lastElement !== element ) {
 				elements[index] = lastElement
 				lastElement.queueIndex = index
 				if ( this.length > 1 ) {
