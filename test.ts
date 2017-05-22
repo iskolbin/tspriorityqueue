@@ -166,10 +166,8 @@ class NumberQueue<T> extends PriorityQueue<NumberQueueItem<T>,number> {
 		})
 		equal( nq.length, items.length )
 		items.forEach( e => {
-			console.log( nq );
 			equal( nq.delete( e ), true )
 		})
-		console.log( nq );
 		equal( nq.length, 0 )
 	}
 
@@ -257,5 +255,18 @@ class NumberQueue<T> extends PriorityQueue<NumberQueueItem<T>,number> {
 	@test("peek 0") case24() {
 		const nq = new NumberQueue<string>()
 		equal( nq.peek(), undefined )
+	}
+
+	@test("forEach") case25() {
+		const priorities = [9,3,1,4,2,5,8,7,6,0]
+		const items = priorities.map( i => new NumberQueueItem<string>(`${i}`))
+		const nq = new NumberQueue<string>( undefined, items, priorities )
+		let counter = 0
+		nq.forEach( (v,i,nq_) => {
+			equal( nq, nq )
+			equal( i, counter )
+			equal( v.value, `${v.priority}` )
+			counter++
+		})
 	}
 }

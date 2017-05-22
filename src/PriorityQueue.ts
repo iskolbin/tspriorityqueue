@@ -121,6 +121,12 @@ export class PriorityQueue<T extends Priority<P>,P> {
 		}
 	}
 
+	forEach<Z>( callbackFn: (this: Z, element: T, index: number, pq: this) => void, thisArg?: Z ): void {
+		for ( const element of this.elements ) {
+			callbackFn.call( thisArg, element, element.queueIndex, this )
+		}
+	}
+
 	protected siftUp( at: number ): number {
 		let index = at
 		let parentIndex = (index-1) >> 1
@@ -132,29 +138,6 @@ export class PriorityQueue<T extends Priority<P>,P> {
 		}
 		return index
 	}
-	/*
-	protected siftDown( at: number ): void {
-		const { elements, length, comparator } = this
-		for ( let index = at; index >= 0; index-- ) {
-			let leftIndex = index + index + 1
-			let rightIndex = leftIndex + 1
-			while ( leftIndex < length ) {
-				let smaller = leftIndex
-				if ( rightIndex < length && comparator( elements[leftIndex].priority, elements[rightIndex].priority ) > 0 ) {
-					smaller = rightIndex
-				}
-				if ( comparator( elements[index].priority, elements[smaller].priority ) > 0 ) {
-					this.swap( index, smaller )
-				} else {
-					break
-				}
-				index = smaller
-				leftIndex = index + index
-				rightIndex = leftIndex + 1
-			}
-		}
-	}
-	 */
 
 	protected siftDownFloyd( at: number ): void {
 		let index = at
