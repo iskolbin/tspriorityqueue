@@ -1,0 +1,22 @@
+{
+  "name": "tspriorityqueue",
+  "main": "./lib/index.js",
+  "repository": "github.com/iskolbin/tspriorityqueue",
+  "description": "Priority queue implemented as indirect binary heap in TS",
+  "version": "0.3.0",
+  "license": "MIT",
+  "scripts": {
+		"test": "./node_modules/typescript/bin/tsc --experimentalDecorators -t es5 test.ts && ./node_modules/nyc/bin/nyc.js --reporter html --reporter text ./node_modules/mocha/bin/mocha test.js",
+		"build": "./node_modules/typescript/bin/tsc",
+    "prepublish": "npm run build"
+  },
+  "devDependencies": {
+    "typescript": "^2.3.2"
+  },
+  "dependencies": {
+    "assert": "^1.4.1",
+    "mocha": "^3.4.1",
+    "mocha-typescript": "^1.1.4",
+    "nyc": "^10.3.2"
+  }
+}
