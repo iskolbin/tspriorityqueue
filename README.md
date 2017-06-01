@@ -42,7 +42,6 @@ Returns element with the highest priority of `undefined` if queue is empty
 Returns `true` if the `element` is in the queue and `false` otherwise
 
 
-
 ## clear(): boolean
 
 If queue has items than clears them and returns `true`. Otherwise returns `false`
