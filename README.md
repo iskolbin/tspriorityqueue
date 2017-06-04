@@ -1,3 +1,5 @@
+[Built status](https://travis-ci.org/iskolbin/tspriorityqueue.svg?branch=master)
+
 Priority queue
 ==============
 
