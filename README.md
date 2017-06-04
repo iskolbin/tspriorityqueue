@@ -1,4 +1,7 @@
-[Built status](https://travis-ci.org/iskolbin/tspriorityqueue.svg?branch=master)
+[![Build Status](https://travis-ci.org/iskolbin/tspriorityqueue.svg?branch=master)](https://travis-ci.org/iskolbin/tspriorityqueue)
+[![license](https://img.shields.io/badge/license-public%20domain-blue.svg)](http://unlicense.org/)
+[![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
+
 
 Priority queue
 ==============
