@@ -1,34 +1,20 @@
 import { PriorityQueue } from './src/PriorityQueue'
-import { Priority } from './src/Priority'
 import { suite, test } from 'mocha-typescript'
 import { equal, deepEqual } from 'assert'
 
-class NumberQueueItem<T> implements Priority<number> {
-	queueIndex: number = -1
-	priority: number = 0
-	value: T
-
-	constructor( value: T ) {
-		this.value = value
-	}
-}
-
-class NumberQueue<T> extends PriorityQueue<NumberQueueItem<T>,number> {
-}
-
 @suite class PriorityQueueTestSute {
-	@test("length") case1() {
-		const nq = new NumberQueue<string>()
+	@test("length") caseLength() {
+		const nq = new PriorityQueue<string,number>()
 		equal( nq.length, 0 )
-		nq.enqueue( new NumberQueueItem<string>(""))
+		nq.enqueue( "", 0 )
 		equal( nq.length, 1 )
-		nq.enqueue( new NumberQueueItem<string>(""))
+		nq.enqueue( "", 0 )
 		equal( nq.length, 2 )
-		nq.enqueue( new NumberQueueItem<string>(""))
+		nq.enqueue( "", 0 )
 		equal( nq.length, 3 )
 		nq.dequeue()
 		equal( nq.length, 2 )
-		nq.enqueue( new NumberQueueItem<string>(""))
+		nq.enqueue( "", 0 )
 		equal( nq.length, 3 )
 		nq.dequeue()
 		equal( nq.length, 2 )
@@ -38,260 +24,298 @@ class NumberQueue<T> extends PriorityQueue<NumberQueueItem<T>,number> {
 		equal( nq.length, 0 )
 	}
 
-	@test("enqueue not queued returns true") case2() {
-		const nq = new NumberQueue<string>()
-		equal( nq.enqueue( new NumberQueueItem<string>("")), true )
+	@test("enqueue returns descriptor") caseEnqueue() {
+		const nq = new PriorityQueue<string,number>()
+		equal( nq.enqueue( "", 0 ), 0 )
+		equal( nq.enqueue( "", 0 ), 1 )
+		equal( nq.enqueue( "", 0 ), 2 )
+		equal( nq.enqueue( "", 3 ), 3 )
+		equal( nq.enqueue( "", 2 ), 4 )
 	}
 
-	@test("enqueue queued returns false") case3() {
-		const nq = new NumberQueue<string>()
-		const item = new NumberQueueItem<string>("")
+	@test("it's ok to queue same items, even with same priorities") caseEnqueueSame() {
+		const nq = new PriorityQueue<string,number>()
+		nq.enqueue( "", 0 )
+		equal( nq.length, 1 )
+		nq.enqueue( "", 0 )
+		equal( nq.length, 2 )
+		nq.enqueue( "", 1 )
+		equal( nq.length, 3 )
+		nq.enqueue( "a", 1 )
+		equal( nq.length, 4 )
+		nq.enqueue( "b", 2 )
+		equal( nq.length, 5 )
+	}
+
+	@test("dequeue returns element with higher priority (min by default)") dequeueCase() {
+		const nq = new PriorityQueue<string,number>()
 		equal( nq.length, 0 )
-		equal( nq.enqueue( item ), true )
-		equal( nq.length, 1 )
-		equal( nq.enqueue( item ), false )
-		equal( nq.length, 1 )
+		equal( nq.enqueue( "1", 1 ), 0 )
+		equal( nq.enqueue( "2", 2 ), 1 )
+		equal( nq.enqueue( "0", 0 ), 2 )
+		equal( nq.enqueue( "5", 5 ), 3 )
+		equal( nq.enqueue( "3", 3 ), 4 )
+		equal( nq.enqueue( "4", 4 ), 5 )
+		equal( nq.length, 6 )
+		equal( nq.dequeue(), "0" )
+		equal( nq.dequeue(), "1" )
+		equal( nq.dequeue(), "2" )
+		equal( nq.length, 3 )
+		equal( nq.dequeue(), "3" )
+		equal( nq.dequeue(), "4" )
+		equal( nq.dequeue(), "5" )
+		equal( nq.length, 0 )
 	}
 
-	@test("dequeue from empty returns undefined") case4() {
-		const nq = new NumberQueue<string>()
+	@test("dequeue from empty returns undefined") dequeueEmpty() {
+		const nq = new PriorityQueue<string,number>()
 		equal( nq.length, 0 )
 		equal( nq.dequeue(), undefined )
+		nq.enqueue( "", 0 )
+		equal( nq.length, 1 )
+		nq.dequeue()
+		equal( nq.dequeue(), undefined )
 	}
-
-	@test("default comparator: min heap") case5() {
-		const nq = new NumberQueue<string>()
+	
+	@test("default comparator: min heap") defaultComparator() {
+		const nq = new PriorityQueue<string,number>()
 		equal( nq.length, 0 )
-		nq.enqueue( new NumberQueueItem<string>( "second" ), 2 )
-		nq.enqueue( new NumberQueueItem<string>( "first" ), 1 )
-		nq.enqueue( new NumberQueueItem<string>( "third") , 3 )
+		nq.enqueue( "second", 2 )
+		nq.enqueue( "first", 1 )
+		nq.enqueue( "third", 3 )
 		equal( nq.length, 3 )
-		equal( nq.dequeue().value, "first" )
-		equal( nq.dequeue().value, "second" )
-		equal( nq.dequeue().value, "third" )
+		equal( nq.dequeue(), "first" )
+		equal( nq.dequeue(), "second" )
+		equal( nq.dequeue(), "third" )
 		equal( nq.length, 0 )
 	}
 
 	@test("custom comparator: max heap") case6() {
-		const nq = new NumberQueue<string>( (a: number, b: number): number => a > b ? -1 : a < b ? 1 : 0 )
+		const comparator = (a: number, b: number): number => a > b ? -1 : a < b ? 1 : 0
+		const nq = new PriorityQueue<string,number>( comparator )
 		equal( nq.length, 0 )
-		nq.enqueue( new NumberQueueItem<string>( "second" ), 2 )
-		nq.enqueue( new NumberQueueItem<string>( "first" ), 3 )
-		nq.enqueue( new NumberQueueItem<string>( "third") , 1 )
+		nq.enqueue( "second", 2 )
+		nq.enqueue( "first", 1 )
+		nq.enqueue( "third", 3 )
 		equal( nq.length, 3 )
-		equal( nq.dequeue().value, "first" )
-		equal( nq.dequeue().value, "second" )
-		equal( nq.dequeue().value, "third" )
+		equal( nq.dequeue(), "third" )
+		equal( nq.dequeue(), "second" )
+		equal( nq.dequeue(), "first" )
 		equal( nq.length, 0 )
 	}
 
-	@test("has and not has") case7() {
-		const nq = new NumberQueue<string>()
-		const item = new NumberQueueItem<string>("")
-		const item2 = new NumberQueueItem<string>("")
-		equal( nq.enqueue( item ), true )
-		equal( nq.has( item ), true )
-		equal( nq.has( item2 ), false )
-		nq.enqueue( item2 )
-		equal( nq.has( item2 ), true )
-		equal( nq.length, 2 )
-	}
-
-	@test("has") case8() {
-		const nq = new NumberQueue<string>()
-		const item = new NumberQueueItem<string>("")
-		equal( nq.enqueue( item ), true )
-		equal( nq.has( item ), true )
-	}
-
-	@test("not has") case9() {
-		const nq = new NumberQueue<string>()
-		const item = new NumberQueueItem<string>("")
-		equal( nq.has( item ), false )
-	}
-
-	@test("update queued and not queued") case10() {
-		const nq = new NumberQueue<string>()
-		const item = new NumberQueueItem<string>("")
-		const item2 = new NumberQueueItem<string>("")
-		nq.enqueue( item, 5 )
-		equal( item.priority, 5 )
-		equal( nq.update( item, 10 ), true )
-		equal( item.priority, 10 )
-		equal( nq.update( item2, 15 ), false )
-	}
-
-	@test("update queued") case11() {
-		const nq = new NumberQueue<string>()
-		const item = new NumberQueueItem<string>("")
-		nq.enqueue( item, 5 )
-		equal( item.priority, 5 )
-		equal( nq.update( item, 10 ), true )
-		equal( item.priority, 10 )
-	}
-
-	@test("update not queued") case12() {
-		const nq = new NumberQueue<string>()
-		const item = new NumberQueueItem<string>("")
-		item.priority = 5
-		equal( nq.update( item, 10 ), false )
-		equal( item.priority, 5 )
-	}
-
-	@test("delete queued") case13() {
-		const nq = new NumberQueue<string>()
-		const item = new NumberQueueItem<string>("")
-		nq.enqueue( item )
-		equal( nq.delete( item ), true )
-		equal( nq.delete( item ), false )
+	@test("has and not has") hasOrNot() {
+		const nq = new PriorityQueue<string,number>()
+		equal( nq.length, 0 )
+		const secondDescriptor = nq.enqueue( "second", 2 )
+		const firstDescriptor = nq.enqueue( "first", 1 )
+		nq.enqueue( "third", 3 )
+		equal( nq.has( "first" ), true )
+		equal( nq.has( "first", firstDescriptor ), true )
+		equal( nq.has( "second" ), true )
+		equal( nq.has( "third" ), true )
+		equal( nq.has( "fourth" ), false )
+		nq.dequeue()
+		equal( nq.has( "first" ), false )
+		equal( nq.has( "second", secondDescriptor ), true )
+		equal( nq.has( "third" ), true )
+		nq.dequeue()
+		equal( nq.has( "third" ), true )
+		equal( nq.has( "second" ), false )
+		nq.dequeue()
+		equal( nq.has( "third" ), false )
 		equal( nq.length, 0 )
 	}
 	
-	@test("delete 2 queued") case14() {
-		const nq = new NumberQueue<string>()
-		const item = new NumberQueueItem<string>("")
-		const item2 = new NumberQueueItem<string>("")
-		nq.enqueue( item )
-		nq.enqueue( item2 )
-		equal( nq.delete( item ), true )
-		equal( nq.delete( item2 ), true )
+	@test("has with wrong descriptor returns false") hasWrongDescriptor() {
+		const nq = new PriorityQueue<string,number>()
+		equal( nq.length, 0 )
+		const secondDescriptor = nq.enqueue( "second", 2 )
+		const firstDescriptor = nq.enqueue( "first", 1 )
+		equal( nq.has( "first" ), true )
+		equal( nq.has( "first", firstDescriptor ), true )
+		equal( nq.has( "first", secondDescriptor ), false )
+		equal( nq.has( "third", 2 ), false )
+		equal( nq.has( "third" ), false )
+		nq.dequeue()
+		equal( nq.has( "first" ), false )
+		equal( nq.has( "first", firstDescriptor ), false )
+		equal( nq.has( "first", secondDescriptor ), false )
+	}
+
+	@test("update") updateCase() {
+		const nq = new PriorityQueue<string,number>()
+		equal( nq.length, 0 )
+		const secondDescriptor = nq.enqueue( "second", 2 )
+		const firstDescriptor = nq.enqueue( "first", 1 )
+		const thirdDescriptor = nq.enqueue( "third", 3 )
+		nq.update( "first", 5 )
+		nq.update( "second", 4, secondDescriptor )
+		equal( nq.dequeue(), "third" )
+		equal( nq.dequeue(), "second" )
+		equal( nq.dequeue(), "first" )
+	}
+
+	@test("update wrong descriptor doesn't change priority") updateWrong() {
+		const nq = new PriorityQueue<string,number>()
+		equal( nq.length, 0 )
+		const secondDescriptor = nq.enqueue( "second", 2 )
+		const firstDescriptor = nq.enqueue( "first", 1 )
+		const thirdDescriptor = nq.enqueue( "third", 3 )
+		nq.update( "first", 5, secondDescriptor )
+		nq.update( "fourth", 1, firstDescriptor )
+		equal( nq.dequeue(), "first" )
+		equal( nq.dequeue(), "second" )
+		equal( nq.dequeue(), "third" )
 		equal( nq.length, 0 )
 	}
-	
-	@test("delete 10 queued") case15() {
-		const nq = new NumberQueue<string>()
-		const items = [0,1,2,3,4,5,6,7,8,9].map( i => new NumberQueueItem<string>(""))
-		items.forEach( e => {
-			equal( nq.enqueue( e ), true )
+
+	@test("update not existing item returns -1") updateEnqueue() {
+		const nq = new PriorityQueue<string,number>()
+		equal( nq.length, 0 )
+		const secondDescriptor = nq.enqueue( "second", 2 )
+		const firstDescriptor = nq.enqueue( "first", 1 )
+		const thirdDescriptor = nq.update( "third", 3 )
+		equal( nq.descriptorOf( "third" ), -1 )
+		equal( nq.dequeue(), "first" )
+		equal( nq.dequeue(), "second" )
+		equal( nq.dequeue(), undefined )
+	}
+
+	@test("delete returns true if items queued and false otherwise") deleteCase() {
+		const nq = new PriorityQueue<string,number>()
+		equal( nq.length, 0 )
+		const secondDescriptor = nq.enqueue( "second", 2 )
+		const firstDescriptor = nq.enqueue( "first", 1 )
+		const thirdDescriptor = nq.enqueue( "third", 3 )
+		equal( nq.delete( "second" ), true )
+		equal( nq.delete( "second" ), false )
+		equal( nq.dequeue(), "first" )
+		equal( nq.delete( "first" ), false )
+		equal( nq.delete( "third" ), true )
+		equal( nq.length, 0 )
+	}
+
+	@test("descriptorOf returns descriptor of enqueued item; if item isn't queued returns -1") findDescriptor() {
+		const nq = new PriorityQueue<string,number>()
+		equal( nq.length, 0 )
+		const secondDescriptor = nq.enqueue( "second", 2 )
+		const firstDescriptor = nq.enqueue( "first", 1 )
+		const thirdDescriptor = nq.enqueue( "third", 3 )
+		equal( nq.descriptorOf( "second" ), secondDescriptor )
+		equal( nq.descriptorOf( "first" ), firstDescriptor )
+		equal( nq.descriptorOf( "third" ), thirdDescriptor )
+		equal( nq.descriptorOf( "fourth" ), -1 )
+		equal( nq.length, 3 )
+	}
+
+	@test("first returns first item or undefined if queue is empty") firstElement() {
+		const nq = new PriorityQueue<string,number>()
+		equal( nq.length, 0 )
+		equal( nq.first(), undefined )
+		const secondDescriptor = nq.enqueue( "second", 2 )
+		const firstDescriptor = nq.enqueue( "first", 1 )
+		const thirdDescriptor = nq.enqueue( "third", 3 )
+		equal( nq.first(), "first" )
+	}
+
+	@test("firstPriority returns first priority or undefined if queue is empty") firstPriority() {
+		const nq = new PriorityQueue<string,number>()
+		equal( nq.length, 0 )
+		equal( nq.firstPriority(), undefined )
+		const secondDescriptor = nq.enqueue( "second", 2 )
+		const firstDescriptor = nq.enqueue( "first", 1 )
+		const thirdDescriptor = nq.enqueue( "third", 3 )
+		equal( nq.firstPriority(), 1 )
+	}
+
+	@test("forEach iterates through elements (not sorted)") forEachCase() {
+		const nq = new PriorityQueue<string,number>()
+		equal( nq.length, 0 )
+		nq.enqueue( "second", 2 )
+		nq.enqueue( "first", 1 )
+		nq.enqueue( "third", 3 )
+		const items: [string,number][] = []
+		nq.forEach( (element,priority,q) => {
+			items.push( [element,priority] )
 		})
-		equal( nq.length, items.length )
-		items.forEach( e => {
-			equal( nq.delete( e ), true )
-		})
+		items.sort( ([_,priority1],[_e,priority2]): number => priority1 - priority2 )
+		equal( nq.dequeue(), items[0][0] )
+		equal( nq.dequeue(), items[1][0] )
+		equal( nq.dequeue(), items[2][0] )
+	}
+
+	@test("constructor's second argument enqueues items") constructorDefault() {
+		const nq = new PriorityQueue<string,number>( undefined, [["first",1],["third",3],["second",2]])
+		equal( nq.dequeue(), "first" )
+		equal( nq.dequeue(), "second" )
+		equal( nq.dequeue(), "third" )
 		equal( nq.length, 0 )
 	}
-
-	@test("batch enqueue") case16() {
-		const nq = new NumberQueue<string>()
-		const priorities = [9,3,1,4,2,5,8,7,6,0]
-		const items = priorities.map( i => new NumberQueueItem<string>(`${i}`))
-		nq.batchEnqueue( items, priorities )
-		priorities.sort()
-		while ( nq.length > 0 ) {
-			equal( nq.dequeue().value, `${priorities.shift()}`)
-		}
+	
+	@test("constructor's third argument is used to store descriptors") constructorBuffer() {
+		const descriptors = []
+		const nq = new PriorityQueue<string,number>( undefined, [["first",1],["third",3],["second",2]], descriptors )
+		equal( nq.descriptorOf( "first" ), descriptors[0] )
+		equal( nq.descriptorOf( "second" ), descriptors[2] )
+		equal( nq.descriptorOf( "third" ), descriptors[1] )
+		equal( nq.length, 3 )
 	}
 	
-	@test("batch enqueue 1 element") case17() {
-		const nq = new NumberQueue<string>()
-		const priorities = [0]
-		const items = priorities.map( i => new NumberQueueItem<string>(`${i}`))
-		nq.batchEnqueue( items, priorities )
-		priorities.sort()
-		while ( nq.length > 0 ) {
-			equal( nq.dequeue().value, `${priorities.shift()}`)
-		}
+	@test("constructor's fourth argument is offset for buffer used to store descriptors") constructorBufferOffset() {
+		const descriptors = [-1,-1,-1]
+		const nq = new PriorityQueue<string,number>( undefined, [["first",1],["third",3],["second",2]], descriptors, 2 )
+		equal( nq.descriptorOf( "first" ), descriptors[2] )
+		equal( nq.descriptorOf( "second" ), descriptors[4] )
+		equal( nq.descriptorOf( "third" ), descriptors[3] )
+		equal( nq.length, 3 )
 	}
 	
-	@test("batch enqueue already queued") case18() {
-		const nq = new NumberQueue<string>()
-		const priorities = [9,3,1,4,2,5,8,7,6,0]
-		const items = priorities.map( i => new NumberQueueItem<string>(`${i}`))
-		equal( nq.batchEnqueue( items, priorities ), 0 )
-		equal( nq.batchEnqueue( items, priorities ), 10 )
-		priorities.sort()
-		while ( nq.length > 0 ) {
-			equal( nq.dequeue().value, `${priorities.shift()}`)
-		}
-	}
-	
-	@test("constructor with args") case19() {
-		const priorities = [9,3,1,4,2,5,8,7,6,0]
-		const items = priorities.map( i => new NumberQueueItem<string>(`${i}`))
-		const nq = new NumberQueue<string>( undefined, items, priorities )
-		priorities.sort()
-		while ( nq.length > 0 ) {
-			equal( nq.dequeue().value, `${priorities.shift()}`)
-		}
-	}
-	
-	@test("batch enqueue with 11 items and 10 priorities") case20() {
-		const nq = new NumberQueue<string>()
-		const priorities = [9,3,1,4,2,5,8,7,6,0]
-		const items = priorities.map( i => new NumberQueueItem<string>(`${i}`))
-		const lastItem = new NumberQueueItem<string>("11")
-		lastItem.priority = 11
-		items.push( lastItem )
-		nq.batchEnqueue( items, priorities )
-		priorities.sort()
-		while ( priorities.length > 0 ) {
-			equal( nq.dequeue().value, `${priorities.shift()}`)
-		}
-		equal( nq.dequeue().value, "11" )
-	}
-	
-	@test("peek 1") case21() {
-		const nq = new NumberQueue<string>()
-		nq.enqueue( new NumberQueueItem<string>( "0" ))
-		equal( nq.peek().value, "0" )
-	}
-	
-	@test("peek 3") case22() {
-		const nq = new NumberQueue<string>()
+	@test("batchEnqueue") batchEnqueue() {
+		const nq = new PriorityQueue<string,number>()
+		nq.batchEnqueue([["first",1],["third",3],["second",2]]) 
+		equal( nq.dequeue(), "first" )
+		equal( nq.dequeue(), "second" )
+		equal( nq.dequeue(), "third" )
+		nq.batchEnqueue([["first",1],["third",3],["second",2]]) 
+		equal( nq.dequeue(), "first" )
+		equal( nq.dequeue(), "second" )
+		equal( nq.dequeue(), "third" )
 		equal( nq.length, 0 )
-		nq.enqueue( new NumberQueueItem<string>( "second" ), 2 )
-		nq.enqueue( new NumberQueueItem<string>( "first" ), 1 )
-		nq.enqueue( new NumberQueueItem<string>( "third") , 3 )
-		equal( nq.peek().value, "first" )
-	}
-
-	@test("peek n") case23() {
-		const priorities = [9,3,1,4,2,5,8,7,6,0]
-		const items = priorities.map( i => new NumberQueueItem<string>(`${i}`))
-		const nq = new NumberQueue<string>( undefined, items, priorities )
-		equal( nq.peek().value, "0" )
 	}
 	
-	@test("peek 0") case24() {
-		const nq = new NumberQueue<string>()
-		equal( nq.peek(), undefined )
+	@test("batchEnqueue with buffer") batchEnqueueBuffer() {
+		const descriptors = []
+		const nq = new PriorityQueue<string,number>()
+		nq.batchEnqueue( [["first",1],["third",3],["second",2]], descriptors ) 
+		equal( nq.descriptorOf( "first" ), descriptors[0] )
+		equal( nq.descriptorOf( "second" ), descriptors[2] )
+		equal( nq.descriptorOf( "third" ), descriptors[1] )
+		equal( nq.length, 3 )
+	}
+	
+	@test("batchEnqueue with buffer and offset") batchEnqueueBufferOffset() {
+		const descriptors = [-1,-1,-1]
+		const nq = new PriorityQueue<string,number>( undefined )
+		nq.batchEnqueue( [["first",1],["third",3],["second",2]], descriptors, 2 ) 
+		equal( nq.descriptorOf( "first" ), descriptors[2] )
+		equal( nq.descriptorOf( "second" ), descriptors[4] )
+		equal( nq.descriptorOf( "third" ), descriptors[3] )
+		equal( nq.length, 3 )
 	}
 
-	@test("forEach") case25() {
-		const priorities = [9,3,1,4,2,5,8,7,6,0]
-		const items = priorities.map( i => new NumberQueueItem<string>(`${i}`))
-		const nq = new NumberQueue<string>( undefined, items, priorities )
-		let counter = 0
-		nq.forEach( (v,i,nq_) => {
-			equal( nq, nq )
-			equal( i, counter )
-			equal( v.value, `${v.priority}` )
-			counter++
-		})
-	}
-
-	@test("empty test") case26() {
-		const nq = new NumberQueue<string>( (a: number, b: number): number => a > b ? -1 : a < b ? 1 : 0 )
-		equal( nq.isEmpty(), true )
-		nq.enqueue( new NumberQueueItem<string>( "second" ), 2 )
-		nq.enqueue( new NumberQueueItem<string>( "first" ), 3 )
-		nq.enqueue( new NumberQueueItem<string>( "third") , 1 )
+	@test("clear method clears items (only if not empty)") clearCase() {
+		const nq = new PriorityQueue<string,number>()
+		equal( nq.length, 0 )
+		nq.clear()
+		equal( nq.length, 0 )
+		nq.enqueue( "second", 2 )
+		nq.enqueue( "first", 1 )
+		nq.enqueue( "third", 3 )
+		equal( nq.length, 3 )
 		equal( nq.isEmpty(), false )
-		equal( nq.dequeue().value, "first" )
-		equal( nq.dequeue().value, "second" )
-		equal( nq.dequeue().value, "third" )
-		equal( nq.isEmpty(), true )
-	}
-
-	@test("clear test") case27() {
-		const nq = new NumberQueue<string>()
-		equal( nq.isEmpty(), true )
-		equal( nq.clear(), false )
-		nq.enqueue( new NumberQueueItem<string>( "first" ), -30 )
-		nq.enqueue( new NumberQueueItem<string>( "third") , -10 )
-		nq.enqueue( new NumberQueueItem<string>( "second" ), -20 )
-		equal( nq.isEmpty(), false )
-		equal( nq.clear(), true )
+		nq.clear()
+		equal( nq.length, 0 )
 		equal( nq.isEmpty(), true )
 	}
 }
